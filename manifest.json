@@ -1,12 +1,13 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "My Dashboard",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "Dashboard",
-  "start_url": "/",
-  "theme_color": "#ffffff",
-  "id": "personal-dashboard"
+  "id": "personal-dashboard",
+  "start_url": "/Personal-Dashboard-/",
+  "scope": "/Personal-Dashboard-/",
+  "display": "standalone",
+  "orientation": "any",
+  "dir": "ltr",
+  "lang": "en",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
 }
