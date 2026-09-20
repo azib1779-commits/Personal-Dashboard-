@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Dashboard</title>
+<style>
+:root{--bg:#0b1120;--card:#111827;--card2:#172033;--text:#f8fafc;--muted:#94a3b8;--border:#263244;--accent:#6366f1}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:linear-gradient(135deg,#0b1120,#1e1b4b);color:var(--text);min-height:100vh}
+.app{max-width:1200px;margin:auto;padding:22px}.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.head h1{margin:0}.muted{color:var(--muted)}
+button,input,textarea{font:inherit}button{cursor:pointer}.theme{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{grid-column:span 4;background:rgba(17,24,39,.94);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 15px 40px #0004}.wide{grid-column:span 6}
+h2{font-size:17px;margin:0 0 14px}.clock{font-size:clamp(40px,6vw,65px);font-weight:800}.date{margin-top:5px;color:var(--muted)}
+.weather{display:flex;align-items:center;gap:15px}.weatherIcon{font-size:52px}.temp{font-size:40px;font-weight:800}
+input,textarea{width:100%;background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;outline:none}textarea{min-height:75px;resize:vertical}
+.row{display:flex;gap:8px;margin:9px 0}.btn{background:var(--accent);color:white;border:0;border-radius:10px;padding:10px 14px;font-weight:700}
+.list{display:flex;flex-direction:column;gap:8px;max-height:290px;overflow:auto}.item{background:var(--card2);border:1px solid var(--border);padding:10px;border-radius:10px;display:flex;gap:9px;align-items:flex-start}.item>span{flex:1;word-break:break-word}.del{background:transparent;color:#fca5a5;border:1px solid #5b2630;border-radius:8px;padding:4px 8px}
+a{color:#c7d2fe;text-decoration:none;font-weight:700;word-break:break-all}.done{text-decoration:line-through;color:var(--muted)}.empty{text-align:center;color:var(--muted);padding:15px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+.light{--bg:#eef2ff;--card:#fff;--card2:#f1f5f9;--text:#0f172a;--muted:#64748b;--border:#dbe2ea}.light body{background:linear-gradient(135deg,#eef2ff,#fff)}
+@media(max-width:850px){.card,.wide{grid-column:span 6}}@media(max-width:560px){.card,.wide{grid-column:span 12}.app{padding:13px}}
+</style>
+</head>
+<body><div class="app">
+<div class="head"><div><h1>👋 Personal Dashboard</h1><div class="muted">Your private workspace</div></div><button class="theme" id="theme">☀️ Theme</button></div>
+<div class="grid">
+<section class="card wide"><h2>🕐 Clock</h2><div id="clock" class="clock">--:--:--</div><div id="date" class="date"></div></section>
+<section class="card wide"><h2>🌤️ Weather</h2><div class="weather"><div id="wi" class="weatherIcon">🌤️</div><div><div id="temp" class="temp">--°C</div><div id="cond" class="muted">Getting weather...</div><div id="loc" class="muted"></div></div></div></section>
+<section class="card"><h2>📝 Notes</h2><textarea id="note" placeholder="Write a note..."></textarea><button class="btn" onclick="addNote()">Add Note</button><div id="notes" class="list"></div></section>
+<section class="card"><h2>✅ Tasks</h2><div class="row"><input id="task" placeholder="Add a task" onkeydown="if(event.key==='Enter')addTask()"><button class="btn" onclick="addTask()">Add</button></div><div id="tasks" class="list"></div></section>
+<section class="card"><h2>🔖 Bookmarks</h2><input id="bn" placeholder="Website name"><div class="row"><input id="bu" placeholder="https://example.com" onkeydown="if(event.key==='Enter')addBookmark()"><button class="btn" onclick="addBookmark()">Add</button></div><div id="bookmarks" class="list"></div></section>
+</div><footer>Notes, tasks and bookmarks are saved in your browser.</footer></div>
+<script>
+const $=x=>document.getElementById(x), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+let notes=JSON.parse(localStorage.notes||'[]'),tasks=JSON.parse(localStorage.tasks||'[]'),bookmarks=JSON.parse(localStorage.bookmarks||'[]');
+const save=()=>{localStorage.notes=JSON.stringify(notes);localStorage.tasks=JSON.stringify(tasks);localStorage.bookmarks=JSON.stringify(bookmarks)};
+function tick(){let d=new Date();$('clock').textContent=d.toLocaleTimeString();$('date').textContent=d.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})}setInterval(tick,1000);tick();
+function renderNotes(){$('notes').innerHTML=notes.length?notes.map((x,i)=>`<div class="item"><span>${esc(x)}</span><button class="del" onclick="notes.splice(${i},1);save();renderNotes()">Delete</button></div>`).join(''):'<div class="empty">No notes yet.</div>'}
+function addNote(){let x=$('note').value.trim();if(!x)return;notes.unshift(x);$('note').value='';save();renderNotes()}
+function renderTasks(){$('tasks').innerHTML=tasks.length?tasks.map((x,i)=>`<div class="item"><input type="checkbox" ${x.done?'checked':''} onchange="tasks[${i}].done=this.checked;save();renderTasks()"><span class="${x.done?'done':''}">${esc(x.text)}</span><button class="del" onclick="tasks.splice(${i},1);save();renderTasks()">×</button></div>`).join(''):'<div class="empty">No tasks yet.</div>'}
+function addTask(){let x=$('task').value.trim();if(!x)return;tasks.unshift({text:x,done:false});$('task').value='';save();renderTasks()}
+function renderBookmarks(){$('bookmarks').innerHTML=bookmarks.length?bookmarks.map((x,i)=>`<div class="item"><span><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a><br><small class="muted">${esc(x.url)}</small></span><button class="del" onclick="bookmarks.splice(${i},1);save();renderBookmarks()">×</button></div>`).join(''):'<div class="empty">No bookmarks yet.</div>'}
+function addBookmark(){let n=$('bn').value.trim(),u=$('bu').value.trim();if(!n||!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;bookmarks.unshift({name:n,url:u});$('bn').value='';$('bu').value='';save();renderBookmarks()}
+async function weather(){try{let p=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{timeout:7000})),{latitude:a,longitude:o}=p.coords;let d=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${a}&longitude=${o}&current=temperature_2m,weather_code&timezone=auto`).then(r=>r.json()),m={0:['☀️','Clear'],1:['🌤️','Mainly clear'],2:['⛅','Partly cloudy'],3:['☁️','Cloudy'],45:['🌫️','Fog'],51:['🌦️','Drizzle'],61:['🌧️','Rain'],63:['🌧️','Rain'],65:['🌧️','Heavy rain'],71:['🌨️','Snow'],80:['🌦️','Showers'],95:['⛈️','Thunderstorm']},z=m[d.current.weather_code]||['🌤️','Weather'];$('wi').textContent=z[0];$('temp').textContent=Math.round(d.current.temperature_2m)+'°C';$('cond').textContent=z[1];$('loc').textContent='Your current location'}catch(e){$('cond').textContent='Allow location access for live weather';$('loc').textContent='Weather unavailable'}}
+$('theme').onclick=()=>{document.documentElement.classList.toggle('light');localStorage.theme=document.documentElement.classList.contains('light')?'light':'dark'};if(localStorage.theme==='light')document.documentElement.classList.add('light');
+renderNotes();renderTasks();renderBookmarks();weather();
+</script></body></html>
